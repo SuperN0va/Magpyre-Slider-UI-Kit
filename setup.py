@@ -223,7 +223,7 @@ jobs:
         uses: actions/deploy-pages@v4
 """
 
-# The main application code - Fixed Coverflow Rotation Logic
+# The main application code - Removed Hover Pause, kept Click Flip
 src_app_tsx = r"""import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid, Info, Heart, Share2 } from 'lucide-react';
 
@@ -491,7 +491,6 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
   const total = images.length;
   
   const [isDragging, setIsDragging] = useState(false);
-  const [isHovering, setIsHovering] = useState(false); // Hover State: Controls Autoplay Pause only
   const [isFlipped, setIsFlipped] = useState(false);   // Flip State: Controls Card Rotation (Click triggered)
   const [startX, setStartX] = useState(0);
   const [dragX, setDragX] = useState(0);
@@ -513,14 +512,14 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     return () => clearTimeout(timer);
   }, [isFlipped]);
 
-  // Updated Autoplay: pauses if dragging, hovering, OR if a card is flipped (user is reading)
+  // Updated Autoplay: Pauses ONLY on drag or flip, NOT on hover
   useEffect(() => {
-    if (total === 0 || isDragging || isHovering || isFlipped) return;
+    if (total === 0 || isDragging || isFlipped) return;
     const timer = setInterval(() => {
       setActiveIndex((prev) => prev + 1); // Infinite loop
     }, autoPlaySpeed);
     return () => clearInterval(timer);
-  }, [total, isDragging, autoPlaySpeed, isHovering, isFlipped]);
+  }, [total, isDragging, autoPlaySpeed, isFlipped]);
 
   const updateIndex = (change: number) => {
       setActiveIndex((prev) => prev + change);
@@ -625,8 +624,6 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
       >
         {/* Background Light */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none z-0" />
@@ -723,8 +720,6 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
       >
         <div className="flex h-full transition-transform ease-out z-10 relative"
             style={{ 
@@ -778,8 +773,6 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-indigo-500/5 blur-[90px] rounded-full pointer-events-none z-0" />
         
@@ -824,8 +817,6 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerUp}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
         >
           {/* Ambient Background Light */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none z-0" />
@@ -946,8 +937,6 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
       >
         <div className="absolute inset-0 bg-indigo-500/5 blur-[60px] pointer-events-none" />
 
@@ -1036,8 +1025,6 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
       >
         {/* Background Light */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0" />
