@@ -245,7 +245,7 @@ const EFFECTS: SlideEffect[] = [
   {
     id: 'coverflow',
     title: 'Coverflow',
-    description: 'iTunes Style 3D + Tap Flip',
+    description: 'Refined iTunes Style',
     icon: <Layers size={18} />,
     code: getCodeSnippet('coverflow')
   }
@@ -612,8 +612,10 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
               
               if (Math.abs(offset) > 4.5) return null;
   
-              const rotateY = offset * -35; 
-              const translateX = offset * 50; 
+              // Refined Rotation: Clamp to 45 deg max to avoid showing backface on sides
+              const rotateY = Math.sign(offset) * -45 * Math.min(Math.abs(offset), 1);
+              
+              const translateX = offset * 60; // Spread out a bit more
               const zIndex = 20 - Math.round(Math.abs(offset));
               const opacity = 1 - Math.min(Math.abs(offset), 3) * 0.15;
               const scale = 1.2 - Math.min(Math.abs(offset), 2) * 0.2; 
@@ -622,15 +624,18 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
               const isActive = Math.round(offset) === 0;
               const flipped = isActive && isFlipped;
 
+              // Deeper depth for side cards to avoid z-fighting/popping
+              // Main depth step + slight receding for further cards
+              const translateZ = -Math.min(Math.abs(offset), 1) * 300 - Math.max(0, Math.abs(offset)-1) * 50;
+
               return (
                 <div
                   key={i}
                   className={`absolute w-[35%] ${aspectRatioClass} ease-out shadow-2xl origin-center`}
                   style={{
                     transformStyle: 'preserve-3d', 
-                    // FIX: Added translateZ(-abs(offset)*200) to physically push back neighbor cards, resolving the "sudden pop"
-                    // Also added flip rotation
-                    transform: `translateX(${translateX}%) translateZ(${-Math.abs(offset) * 200}px) rotateY(${rotateY + (flipped ? 180 : 0)}deg) scale(${scale})`,
+                    // Flip rotation added to the existing Y rotation
+                    transform: `translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY + (flipped ? 180 : 0)}deg) scale(${scale})`,
                     zIndex: zIndex,
                     opacity: opacity,
                     borderRadius: '12px',
