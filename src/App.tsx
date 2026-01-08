@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, RectangleHorizontal, RectangleVertical, Square, CreditCard, Cuboid } from 'lucide-react';
-import 'keen-slider/keen-slider.min.css';
-import { useKeenSlider } from 'keen-slider/react';
+import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
 
 // --- Types ---
 type EffectType = 'zoom-out' | 'standard' | 'multiple' | 'coverflow' | 'stack' | 'cube';
