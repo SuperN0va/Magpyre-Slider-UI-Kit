@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-// FIX: Added ChevronLeft and ChevronRight back to imports
 import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
 
 // --- Types ---
@@ -548,11 +547,11 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                     transitionDuration: isDragging ? '0ms' : '700ms'
                   }}
                 >
-                    {/* Thickness Layers */}
-                    {[1, 2, 3, 4, 5].map(n => (
+                    {/* Thickness Layers - Increased to 12 layers for visible thickness */}
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
                         <div 
                             key={`depth-${n}`}
-                            className="absolute inset-0 w-full h-full rounded-xl bg-slate-800"
+                            className="absolute inset-0 w-full h-full rounded-xl bg-slate-800 border border-slate-700/30"
                             style={{ transform: `translateZ(-${n}px)` }}
                         />
                     ))}
