@@ -223,7 +223,7 @@ jobs:
         uses: actions/deploy-pages@v4
 """
 
-# The main application code - Implemented Hover Pause & Flip Effect
+# The main application code - Implemented Click-to-Flip for Mobile/Desktop
 src_app_tsx = r"""import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid, Info, Heart, Share2 } from 'lucide-react';
 
@@ -471,7 +471,7 @@ const EFFECTS: SlideEffect[] = [
   {
     id: 'coverflow',
     title: 'Coverflow',
-    description: 'iTunes Style 3D + Hover Flip',
+    description: 'iTunes Style 3D + Tap Flip',
     icon: <Layers size={18} />,
     code: getCodeSnippet('coverflow')
   }
@@ -491,7 +491,8 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
   const total = images.length;
   
   const [isDragging, setIsDragging] = useState(false);
-  const [isHovering, setIsHovering] = useState(false); // New State for Hover
+  const [isHovering, setIsHovering] = useState(false); // Hover State: Controls Autoplay Pause only
+  const [isFlipped, setIsFlipped] = useState(false);   // Flip State: Controls Card Rotation (Click triggered)
   const [startX, setStartX] = useState(0);
   const [dragX, setDragX] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -500,20 +501,22 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
   useEffect(() => {
     setActiveIndex(0);
     setDragX(0);
+    setIsFlipped(false);
   }, [images]);
 
-  // Updated Autoplay: pauses if hovering
+  // Updated Autoplay: pauses if dragging, hovering, OR if a card is flipped (user is reading)
   useEffect(() => {
-    if (total === 0 || isDragging || isHovering) return;
+    if (total === 0 || isDragging || isHovering || isFlipped) return;
     const timer = setInterval(() => {
       setActiveIndex((prev) => prev + 1); // Infinite loop
     }, autoPlaySpeed);
     return () => clearInterval(timer);
-  }, [total, isDragging, autoPlaySpeed, isHovering]);
+  }, [total, isDragging, autoPlaySpeed, isHovering, isFlipped]);
 
   const updateIndex = (change: number) => {
       setActiveIndex((prev) => prev + change);
       setDragX(0);
+      setIsFlipped(false); // Reset flip on slide change
   };
 
   const next = () => updateIndex(1);
@@ -566,6 +569,10 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     if (moveCount !== 0) {
         updateIndex(moveCount);
     } else {
+        // Tap Detection: If very little movement, treat as click
+        if (Math.abs(dragX) < 5) {
+             setIsFlipped(prev => !prev);
+        }
         setDragX(0);
     }
   };
@@ -794,10 +801,9 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
               const opacity = 1 - Math.min(Math.abs(offset), 3) * 0.15;
               const scale = 1.2 - Math.min(Math.abs(offset), 2) * 0.2; 
               
-              // Flip Logic for Active Card
-              // We consider "active" if it's the center card (offset ~ 0) AND we are hovering
+              // Flip Logic: Active card flips on Click/Tap, not Hover
               const isActive = Math.round(offset) === 0;
-              const isFlipped = isActive && isHovering;
+              const flipped = isActive && isFlipped;
 
               return (
                 <div
@@ -805,8 +811,8 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                   className={`absolute w-[35%] ${aspectRatioClass} ease-out shadow-2xl origin-center`}
                   style={{
                     transformStyle: 'preserve-3d', 
-                    // Add extra rotation if flipped (for active card only)
-                    transform: `translateX(${translateX}%) rotateY(${rotateY + (isFlipped ? 180 : 0)}deg) scale(${scale})`,
+                    // Flip rotation added to the existing Y rotation
+                    transform: `translateX(${translateX}%) rotateY(${rotateY + (flipped ? 180 : 0)}deg) scale(${scale})`,
                     zIndex: zIndex,
                     opacity: opacity,
                     borderRadius: '12px',
@@ -815,8 +821,8 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                 >
                     {/* --- INNER CARD CONTENT (Front & Back) --- */}
                     
-                    {/* Thickness Layers - Keep them simpler for flip physics, attached to the main plane */}
-                    {!isFlipped && Array.from({ length: 8 }, (_, i) => i + 1).map(n => (
+                    {/* Thickness Layers - Only show when NOT flipped to avoid visual glitches during transition */}
+                    {!flipped && Array.from({ length: 8 }, (_, i) => i + 1).map(n => (
                         <div 
                             key={`depth-${n}`}
                             className="absolute inset-0 w-full h-full rounded-xl bg-slate-800 border border-slate-700/30"
