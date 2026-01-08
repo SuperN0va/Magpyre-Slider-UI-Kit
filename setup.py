@@ -223,9 +223,9 @@ jobs:
         uses: actions/deploy-pages@v4
 """
 
-# The main application code - Added Tags and Ambient Light
+# The main application code - Implemented Hover Pause & Flip Effect
 src_app_tsx = r"""import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
+import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid, Info, Heart, Share2 } from 'lucide-react';
 
 // --- Types ---
 type EffectType = 'zoom-out' | 'standard' | 'multiple' | 'coverflow' | 'stack' | 'cube';
@@ -255,6 +255,8 @@ const DEFAULT_IMAGES = [
 
 // --- Mock Data for Tags ---
 const MOCK_TAGS = ["Nature", "Urban", "Tech", "Abstract", "People", "Cyber", "Space", "Ocean", "Retro", "Minimal"];
+const MOCK_TITLES = ["Ethereal Dreams", "Urban Jungle", "Neon Lights", "Geometric Flow", "Human Spirit", "Cyber Punk", "Deep Cosmos", "Blue Horizon", "Vintage Soul", "Clean Lines"];
+const MOCK_DESC = "Experience the immersive detail and depth of this stunning visual composition.";
 
 // --- Code Snippet Generator ---
 const getCodeSnippet = (type: EffectType) => {
@@ -469,7 +471,7 @@ const EFFECTS: SlideEffect[] = [
   {
     id: 'coverflow',
     title: 'Coverflow',
-    description: 'iTunes Style 3D',
+    description: 'iTunes Style 3D + Hover Flip',
     icon: <Layers size={18} />,
     code: getCodeSnippet('coverflow')
   }
@@ -489,6 +491,7 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
   const total = images.length;
   
   const [isDragging, setIsDragging] = useState(false);
+  const [isHovering, setIsHovering] = useState(false); // New State for Hover
   const [startX, setStartX] = useState(0);
   const [dragX, setDragX] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -499,13 +502,14 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     setDragX(0);
   }, [images]);
 
+  // Updated Autoplay: pauses if hovering
   useEffect(() => {
-    if (total === 0 || isDragging) return;
+    if (total === 0 || isDragging || isHovering) return;
     const timer = setInterval(() => {
       setActiveIndex((prev) => prev + 1); // Infinite loop
     }, autoPlaySpeed);
     return () => clearInterval(timer);
-  }, [total, isDragging, autoPlaySpeed]);
+  }, [total, isDragging, autoPlaySpeed, isHovering]);
 
   const updateIndex = (change: number) => {
       setActiveIndex((prev) => prev + change);
@@ -605,6 +609,8 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
         {/* Background Light */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none z-0" />
@@ -667,6 +673,8 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
         <div className="flex h-full transition-transform ease-out z-10 relative"
             style={{ 
@@ -720,6 +728,8 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-indigo-500/5 blur-[90px] rounded-full pointer-events-none z-0" />
         
@@ -764,8 +774,10 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerUp}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
         >
-          {/* Ambient Background Light - Low saturation */}
+          {/* Ambient Background Light */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none z-0" />
 
           <div className="flex items-center justify-center w-full h-full relative pointer-events-none z-10" style={{ perspective: '1200px' }}>
@@ -781,22 +793,30 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
               const zIndex = 20 - Math.round(Math.abs(offset));
               const opacity = 1 - Math.min(Math.abs(offset), 3) * 0.15;
               const scale = 1.2 - Math.min(Math.abs(offset), 2) * 0.2; 
-  
+              
+              // Flip Logic for Active Card
+              // We consider "active" if it's the center card (offset ~ 0) AND we are hovering
+              const isActive = Math.round(offset) === 0;
+              const isFlipped = isActive && isHovering;
+
               return (
                 <div
                   key={i}
                   className={`absolute w-[35%] ${aspectRatioClass} ease-out shadow-2xl origin-center`}
                   style={{
                     transformStyle: 'preserve-3d', 
-                    transform: `translateX(${translateX}%) rotateY(${rotateY}deg) scale(${scale})`,
+                    // Add extra rotation if flipped (for active card only)
+                    transform: `translateX(${translateX}%) rotateY(${rotateY + (isFlipped ? 180 : 0)}deg) scale(${scale})`,
                     zIndex: zIndex,
                     opacity: opacity,
                     borderRadius: '12px',
                     transitionDuration: isDragging ? '0ms' : '700ms'
                   }}
                 >
-                    {/* Thickness Layers - 12 layers for solid feel */}
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
+                    {/* --- INNER CARD CONTENT (Front & Back) --- */}
+                    
+                    {/* Thickness Layers - Keep them simpler for flip physics, attached to the main plane */}
+                    {!isFlipped && Array.from({ length: 8 }, (_, i) => i + 1).map(n => (
                         <div 
                             key={`depth-${n}`}
                             className="absolute inset-0 w-full h-full rounded-xl bg-slate-800 border border-slate-700/30"
@@ -804,12 +824,12 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                         />
                     ))}
 
-                    {/* Main Image Content */}
-                    <div className="absolute inset-0 w-full h-full bg-slate-900 rounded-xl overflow-hidden" style={{ transform: 'translateZ(0.5px)' }}>
+                    {/* FRONT FACE (Image) */}
+                    <div className="absolute inset-0 w-full h-full bg-slate-900 rounded-xl overflow-hidden backface-hidden" 
+                         style={{ transform: 'translateZ(0.5px)' }}>
                         <img src={src} className="w-full h-full object-cover pointer-events-none" alt="" />
                         <div className="absolute inset-0 bg-black/10 transition-opacity duration-300" style={{ opacity: Math.abs(offset) < 0.5 ? 0 : 0.4 }} />
                         
-                        {/* Info Overlay */}
                         <div className="absolute top-4 left-4 flex items-center gap-2">
                             <div className="px-2.5 py-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center gap-1.5">
                                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
@@ -818,8 +838,34 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                         </div>
 
                         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-10">
-                             <h3 className="text-white font-bold text-lg leading-tight drop-shadow-md">Gallery Item {i + 1}</h3>
-                             <p className="text-white/60 text-[10px] mt-0.5 line-clamp-1">Explore the detailed view of this amazing capture.</p>
+                             <h3 className="text-white font-bold text-lg leading-tight drop-shadow-md">Item {i + 1}</h3>
+                        </div>
+                    </div>
+
+                    {/* BACK FACE (Info) - Rotated 180deg */}
+                    <div className="absolute inset-0 w-full h-full bg-slate-800 rounded-xl overflow-hidden backface-hidden border border-slate-700 flex flex-col p-6"
+                         style={{ transform: 'rotateY(180deg) translateZ(0.5px)' }}>
+                        
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                <Info size={16} />
+                            </div>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Details</span>
+                        </div>
+
+                        <h3 className="text-white font-bold text-xl mb-2">{MOCK_TITLES[i % MOCK_TITLES.length]}</h3>
+                        <p className="text-slate-400 text-xs leading-relaxed mb-6">
+                            {MOCK_DESC}
+                        </p>
+
+                        <div className="mt-auto flex items-center justify-between border-t border-slate-700/50 pt-4">
+                            <div className="flex gap-3 text-slate-400">
+                                <button className="hover:text-white transition-colors"><Heart size={18} /></button>
+                                <button className="hover:text-white transition-colors"><Share2 size={18} /></button>
+                            </div>
+                            <button className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-colors">
+                                View More
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -843,6 +889,8 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
         <div className="absolute inset-0 bg-indigo-500/5 blur-[60px] pointer-events-none" />
 
@@ -931,6 +979,8 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
         {/* Background Light */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0" />
