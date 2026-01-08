@@ -1,1 +1,0 @@
-# Magpyre-Slider-UI-Kit
