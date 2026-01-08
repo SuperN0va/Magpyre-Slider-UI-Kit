@@ -223,9 +223,10 @@ jobs:
         uses: actions/deploy-pages@v4
 """
 
-# The main application code - Top Navigation Layout
+# The main application code - Fixed Imports
 src_app_tsx = r"""import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Check, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
+// FIX: Added ChevronLeft and ChevronRight back to imports
+import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
 
 // --- Types ---
 type EffectType = 'zoom-out' | 'standard' | 'multiple' | 'coverflow' | 'stack' | 'cube';
@@ -765,7 +766,7 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                   key={i}
                   className={`absolute w-[35%] ${aspectRatioClass} ease-out shadow-2xl origin-center`}
                   style={{
-                    transformStyle: 'preserve-3d', // Enable 3D for children (thickness)
+                    transformStyle: 'preserve-3d', 
                     transform: `translateX(${translateX}%) rotateY(${rotateY}deg) scale(${scale})`,
                     zIndex: zIndex,
                     opacity: opacity,
@@ -773,7 +774,7 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                     transitionDuration: isDragging ? '0ms' : '700ms'
                   }}
                 >
-                    {/* Thickness Layers - Stacked plates to simulate depth */}
+                    {/* Thickness Layers */}
                     {[1, 2, 3, 4, 5].map(n => (
                         <div 
                             key={`depth-${n}`}
@@ -782,7 +783,7 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                         />
                     ))}
 
-                    {/* Main Image Layer */}
+                    {/* Main Image */}
                     <div className="absolute inset-0 w-full h-full" style={{ transform: 'translateZ(0.5px)' }}>
                         <img src={src} className="w-full h-full object-cover rounded-xl shadow-2xl pointer-events-none" alt="" />
                         <div className="absolute inset-0 bg-black/20 rounded-xl transition-opacity duration-300" style={{ opacity: Math.abs(offset) < 0.5 ? 0 : 0.5 }} />
