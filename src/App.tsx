@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
+import { Copy, Check, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
 
 // --- Types ---
 type EffectType = 'zoom-out' | 'standard' | 'multiple' | 'coverflow' | 'stack' | 'cube';
@@ -539,17 +539,28 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                   key={i}
                   className={`absolute w-[35%] ${aspectRatioClass} ease-out shadow-2xl origin-center`}
                   style={{
+                    transformStyle: 'preserve-3d', // Enable 3D for children (thickness)
                     transform: `translateX(${translateX}%) rotateY(${rotateY}deg) scale(${scale})`,
                     zIndex: zIndex,
                     opacity: opacity,
-                    backgroundImage: `url(${src})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
                     borderRadius: '12px',
                     transitionDuration: isDragging ? '0ms' : '700ms'
                   }}
                 >
-                    <div className="absolute inset-0 bg-black/20 rounded-xl transition-opacity duration-300" style={{ opacity: Math.abs(offset) < 0.5 ? 0 : 0.5 }} />
+                    {/* Thickness Layers - Stacked plates to simulate depth */}
+                    {[1, 2, 3, 4, 5].map(n => (
+                        <div 
+                            key={`depth-${n}`}
+                            className="absolute inset-0 w-full h-full rounded-xl bg-slate-800"
+                            style={{ transform: `translateZ(-${n}px)` }}
+                        />
+                    ))}
+
+                    {/* Main Image Layer */}
+                    <div className="absolute inset-0 w-full h-full" style={{ transform: 'translateZ(0.5px)' }}>
+                        <img src={src} className="w-full h-full object-cover rounded-xl shadow-2xl pointer-events-none" alt="" />
+                        <div className="absolute inset-0 bg-black/20 rounded-xl transition-opacity duration-300" style={{ opacity: Math.abs(offset) < 0.5 ? 0 : 0.5 }} />
+                    </div>
                 </div>
               );
             })}
