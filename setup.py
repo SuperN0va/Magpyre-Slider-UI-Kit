@@ -223,7 +223,7 @@ jobs:
         uses: actions/deploy-pages@v4
 """
 
-# The main application code - Refined Coverflow Physics (Deep Depth + Wide Spacing)
+# The main application code - Reverted Coverflow to Classic Tight Spacing
 src_app_tsx = r"""import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid, Info, Heart, Share2 } from 'lucide-react';
 
@@ -471,7 +471,7 @@ const EFFECTS: SlideEffect[] = [
   {
     id: 'coverflow',
     title: 'Coverflow',
-    description: 'Classic iTunes Style',
+    description: 'Classic iTunes Style + Tap Flip',
     icon: <Layers size={18} />,
     code: getCodeSnippet('coverflow')
   }
@@ -838,21 +838,23 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
               
               if (Math.abs(offset) > 4.5) return null;
   
-              // --- KEY FIX: Use classic continuous rotation (no clamping) for that "Old Design" feel ---
-              // Previously: Math.sign(offset) * -45 * Math.min(Math.abs(offset), 1);
+              // --- RESTORED: Classic iTunes-style rotation and spacing ---
+              // Continuous rotation based on offset
               const rotateY = offset * -45; 
               
-              // --- KEY FIX: Widen spacing to reduce overlap clashing ---
-              // Previously: offset * 60
-              const translateX = offset * 85; 
+              // Tighter spacing (50 instead of 85) to bring cards closer
+              const translateX = offset * 50; 
 
-              // --- KEY FIX: Deep Z-Push to prevent "popping/clipping" ---
-              // Push side cards WAY back so the center card has total dominance
-              const translateZ = -Math.abs(offset) * 500;
+              // Minimal Z-Depth push to maintain stacking order without excessive gap
+              // Using a small negative value to ensure z-indexing works but cards stay close
+              // Removing the large -500px push
+              const translateZ = 0; 
 
               const zIndex = 20 - Math.round(Math.abs(offset));
               const opacity = 1 - Math.min(Math.abs(offset), 3) * 0.15;
-              const scale = 1.2 - Math.min(Math.abs(offset), 2) * 0.2; 
+              
+              // Subtle scale drop-off for side cards
+              const scale = 1 - Math.min(Math.abs(offset), 1) * 0.2; // Center 1.0, sides 0.8
               
               const isActive = Math.round(offset) === 0;
               const flipped = isActive && isFlipped;
