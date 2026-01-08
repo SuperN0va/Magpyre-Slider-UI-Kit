@@ -223,9 +223,9 @@ jobs:
         uses: actions/deploy-pages@v4
 """
 
-# The main application code - Increased Coverflow Depth
+# The main application code - Added Tags and Ambient Light
 src_app_tsx = r"""import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
+import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid, Tag } from 'lucide-react';
 
 // --- Types ---
 type EffectType = 'zoom-out' | 'standard' | 'multiple' | 'coverflow' | 'stack' | 'cube';
@@ -252,6 +252,9 @@ const DEFAULT_IMAGES = [
   "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-1.2.1&auto=format&fit=crop&h=500&w=800&q=80",
   "https://images.unsplash.com/photo-1504198266287-1659872e6590?ixlib=rb-1.2.1&auto=format&fit=crop&h=500&w=800&q=80"
 ];
+
+// --- Mock Data for Tags ---
+const MOCK_TAGS = ["Nature", "Urban", "Tech", "Abstract", "People", "Cyber", "Space", "Ocean", "Retro", "Minimal"];
 
 // --- Code Snippet Generator ---
 const getCodeSnippet = (type: EffectType) => {
@@ -596,14 +599,17 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     return (
       <div 
         ref={containerRef}
-        className="w-full max-w-4xl mx-auto flex items-center justify-center overflow-hidden bg-gray-900/50 rounded-2xl border border-gray-700/50 touch-none cursor-grab active:cursor-grabbing"
+        className="w-full max-w-4xl mx-auto flex items-center justify-center overflow-hidden bg-slate-900/50 rounded-2xl border border-slate-700/50 touch-none cursor-grab active:cursor-grabbing relative"
         style={containerStyle}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        <div className="flex items-center justify-center w-full h-full relative pointer-events-none">
+        {/* Background Light */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none z-0" />
+
+        <div className="flex items-center justify-center w-full h-full relative pointer-events-none z-10">
           {images.map((src, i) => {
             let offset = getNormalizedOffset(i, activeIndex, total) + dragFraction;
             while (offset < -total / 2) offset += total;
@@ -622,7 +628,7 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
             return (
               <div
                 key={i}
-                className={`absolute w-[45%] ${aspectRatioClass} transition-all ease-[cubic-bezier(0.25,0.1,0.25,1.0)]`} 
+                className={`absolute w-[45%] ${aspectRatioClass} transition-all ease-[cubic-bezier(0.25,0.1,0.25,1.0)] group`} 
                 style={{
                   transform: `translateX(${translateX}%) scale(${scale})`,
                   opacity: Math.max(opacity, 0.4),
@@ -630,10 +636,16 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                   transitionDuration: isDragging ? '0ms' : '700ms'
                 }}
               >
-                <img src={src} className="w-full h-full object-cover rounded-xl shadow-2xl pointer-events-none" alt="" />
-                {isActive && !isDragging && (
-                   <div className="absolute inset-0 ring-2 ring-indigo-500 rounded-xl pointer-events-none transition-opacity duration-300" />
-                )}
+                <div className="relative w-full h-full overflow-hidden rounded-xl shadow-2xl">
+                    <img src={src} className="w-full h-full object-cover" alt="" />
+                    <div className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${isActive ? 'opacity-0' : 'opacity-40'}`} />
+                    
+                    {/* Tags Layer */}
+                    <div className="absolute top-3 left-3 px-2 py-1 bg-black/40 backdrop-blur-sm border border-white/10 rounded-full flex items-center gap-1.5 transition-opacity duration-300" style={{ opacity: isActive ? 1 : 0.6 }}>
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                        <span className="text-[10px] font-medium text-white/90 uppercase tracking-wide">{MOCK_TAGS[i % MOCK_TAGS.length]}</span>
+                    </div>
+                </div>
               </div>
             );
           })}
@@ -649,15 +661,14 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     return (
       <div 
         ref={containerRef}
-        className="w-full max-w-4xl mx-auto rounded-2xl overflow-hidden bg-gray-900/50 border border-gray-700/50 group touch-none cursor-grab active:cursor-grabbing"
+        className="w-full max-w-4xl mx-auto rounded-2xl overflow-hidden bg-slate-900/50 border border-slate-700/50 group touch-none cursor-grab active:cursor-grabbing relative"
         style={containerStyle}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        <div 
-            className="flex h-full transition-transform ease-out"
+        <div className="flex h-full transition-transform ease-out z-10 relative"
             style={{ 
                 position: 'relative',
                 width: '100%'
@@ -681,13 +692,16 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                 >
                     <img src={src} className="w-full h-full object-cover select-none" alt="" />
                     <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/90 to-transparent">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-0.5 bg-indigo-500/80 rounded text-[10px] uppercase font-bold text-white tracking-wider">{MOCK_TAGS[i % MOCK_TAGS.length]}</span>
+                        </div>
                         <h3 className="text-white font-bold text-2xl">Slide {i + 1}</h3>
                     </div>
                 </div>
              );
           })}
         </div>
-         <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 pointer-events-none z-10">
+         <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 pointer-events-none z-20">
             {images.map((_, i) => (
                 <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${(i === (activeIndex % total + total) % total) ? 'w-8 bg-white' : 'w-2 bg-white/40'}`} />
             ))}
@@ -700,14 +714,16 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     return (
       <div 
         ref={containerRef}
-        className="w-full overflow-hidden bg-gray-900/50 rounded-2xl border border-gray-700/50 p-6 flex items-center touch-none cursor-grab active:cursor-grabbing"
+        className="w-full overflow-hidden bg-slate-900/50 rounded-2xl border border-slate-700/50 p-6 flex items-center touch-none cursor-grab active:cursor-grabbing relative"
         style={containerStyle}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        <div className="relative w-full h-full">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-indigo-500/5 blur-[90px] rounded-full pointer-events-none z-0" />
+        
+        <div className="relative w-full h-full z-10">
           {images.map((src, i) => {
             let offset = getNormalizedOffset(i, activeIndex, total) + dragFraction;
             while (offset < -total / 2) offset += total;
@@ -726,6 +742,9 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                     }}
                 >
                     <img src={src} className="w-full h-full object-cover select-none" alt="" />
+                    <div className="absolute top-2 left-2">
+                        <span className="px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[10px] text-white/90 border border-white/10">{MOCK_TAGS[i % MOCK_TAGS.length]}</span>
+                    </div>
                     <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-md">Card {i+1}</div>
                 </div>
             )
@@ -739,14 +758,17 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
       return (
         <div 
             ref={containerRef}
-            className="w-full max-w-5xl mx-auto flex items-center justify-center overflow-hidden bg-gray-900/50 rounded-2xl border border-gray-700/50 perspective-1000 touch-none cursor-grab active:cursor-grabbing"
+            className="w-full max-w-5xl mx-auto flex items-center justify-center overflow-hidden bg-slate-900/50 rounded-2xl border border-slate-700/50 perspective-1000 touch-none cursor-grab active:cursor-grabbing relative"
             style={containerStyle}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerUp}
         >
-          <div className="flex items-center justify-center w-full h-full relative pointer-events-none" style={{ perspective: '1200px' }}>
+          {/* Ambient Background Light - Low saturation */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none z-0" />
+
+          <div className="flex items-center justify-center w-full h-full relative pointer-events-none z-10" style={{ perspective: '1200px' }}>
             {images.map((src, i) => {
               let offset = getNormalizedOffset(i, activeIndex, total) + dragFraction;
               while (offset < -total / 2) offset += total;
@@ -773,7 +795,7 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                     transitionDuration: isDragging ? '0ms' : '700ms'
                   }}
                 >
-                    {/* Thickness Layers - Increased to 12 layers for visible thickness */}
+                    {/* Thickness Layers - 12 layers for solid feel */}
                     {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
                         <div 
                             key={`depth-${n}`}
@@ -782,17 +804,30 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                         />
                     ))}
 
-                    {/* Main Image */}
-                    <div className="absolute inset-0 w-full h-full" style={{ transform: 'translateZ(0.5px)' }}>
-                        <img src={src} className="w-full h-full object-cover rounded-xl shadow-2xl pointer-events-none" alt="" />
-                        <div className="absolute inset-0 bg-black/20 rounded-xl transition-opacity duration-300" style={{ opacity: Math.abs(offset) < 0.5 ? 0 : 0.5 }} />
+                    {/* Main Image Content */}
+                    <div className="absolute inset-0 w-full h-full bg-slate-900 rounded-xl overflow-hidden" style={{ transform: 'translateZ(0.5px)' }}>
+                        <img src={src} className="w-full h-full object-cover pointer-events-none" alt="" />
+                        <div className="absolute inset-0 bg-black/10 transition-opacity duration-300" style={{ opacity: Math.abs(offset) < 0.5 ? 0 : 0.4 }} />
+                        
+                        {/* Info Overlay */}
+                        <div className="absolute top-4 left-4 flex items-center gap-2">
+                            <div className="px-2.5 py-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
+                                <span className="text-[10px] font-medium text-white/90 tracking-wide uppercase">{MOCK_TAGS[i % MOCK_TAGS.length]}</span>
+                            </div>
+                        </div>
+
+                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-10">
+                             <h3 className="text-white font-bold text-lg leading-tight drop-shadow-md">Gallery Item {i + 1}</h3>
+                             <p className="text-white/60 text-[10px] mt-0.5 line-clamp-1">Explore the detailed view of this amazing capture.</p>
+                        </div>
                     </div>
                 </div>
               );
             })}
           </div>
             
-            <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-4 z-30 p-3 bg-black/30 hover:bg-black/50 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 pointer-events-auto"><ChevronLeft size={24} /></button>
+            <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-4 z-30 p-3 bg-black/40 hover:bg-black/60 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 pointer-events-auto"><ChevronLeft size={24} /></button>
             <button onClick={(e) => { e.stopPropagation(); next(); }} className="absolute right-4 z-30 p-3 bg-black/30 hover:bg-black/50 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 pointer-events-auto"><ChevronRight size={24} /></button>
         </div>
       );
@@ -802,14 +837,16 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     return (
       <div 
         ref={containerRef}
-        className="w-full max-w-md mx-auto flex items-center justify-center overflow-hidden bg-gray-900/50 rounded-2xl border border-gray-700/50 touch-none cursor-grab active:cursor-grabbing"
+        className="w-full max-w-md mx-auto flex items-center justify-center overflow-hidden bg-slate-900/50 rounded-2xl border border-slate-700/50 touch-none cursor-grab active:cursor-grabbing relative"
         style={containerStyle}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        <div className="flex items-center justify-center w-full h-full relative pointer-events-none">
+        <div className="absolute inset-0 bg-indigo-500/5 blur-[60px] pointer-events-none" />
+
+        <div className="flex items-center justify-center w-full h-full relative pointer-events-none z-10">
           {images.map((src, i) => {
             let rawOffset = getNormalizedOffset(i, activeIndex, total) + dragFraction;
             while (rawOffset < -total / 2) rawOffset += total;
@@ -850,7 +887,12 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                   transitionDuration: isDragging ? '0ms' : '500ms'
                 }}
               >
-                <img src={src} className="w-full h-full object-cover rounded-xl pointer-events-none border border-white/10" alt="" />
+                <div className="relative w-full h-full rounded-xl overflow-hidden border border-white/10 bg-slate-800">
+                    <img src={src} className="w-full h-full object-cover pointer-events-none" alt="" />
+                    <div className="absolute top-3 left-3">
+                        <span className="px-2 py-1 bg-black/50 backdrop-blur rounded text-[10px] text-white/90 border border-white/5">{MOCK_TAGS[i % MOCK_TAGS.length]}</span>
+                    </div>
+                </div>
                 {rawOffset > 0 && (
                     <div className="absolute inset-0 bg-black/40 rounded-xl transition-all duration-300" />
                 )}
@@ -883,15 +925,18 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     return (
       <div 
         ref={containerRef}
-        className="w-full h-full flex items-center justify-center overflow-hidden bg-gray-900/50 rounded-2xl border border-gray-700/50 touch-none cursor-grab active:cursor-grabbing"
+        className="w-full h-full flex items-center justify-center overflow-hidden bg-slate-900/50 rounded-2xl border border-slate-700/50 touch-none cursor-grab active:cursor-grabbing relative"
         style={{...containerStyle, perspective: '2500px'}} 
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
+        {/* Background Light */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0" />
+
         <div 
-            className="relative" 
+            className="relative z-10" 
             style={{ 
                 width: `${cubeWidth}px`, 
                 height: `${cubeHeight}px`,
@@ -921,14 +966,22 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                   transitionDuration: isDragging ? '0ms' : '700ms',
                 }}
               >
-                <img src={src} className="w-full h-full object-cover rounded-xl pointer-events-none shadow-2xl border border-white/5" alt="" />
-                <div 
-                    className="absolute inset-0 bg-black transition-opacity pointer-events-none rounded-xl" 
-                    style={{ 
-                        opacity: Math.min(shadowOpacity * 0.8, 0.8),
-                        transitionDuration: isDragging ? '0ms' : '700ms'
-                    }} 
-                />
+                <div className="relative w-full h-full rounded-xl overflow-hidden border border-white/10 bg-slate-800 shadow-2xl">
+                    <img src={src} className="w-full h-full object-cover pointer-events-none" alt="" />
+                    
+                    {/* Tags Layer for Cube */}
+                    <div className="absolute top-4 left-4">
+                        <span className="px-2 py-1 bg-black/50 backdrop-blur rounded text-[10px] text-white/90 border border-white/10 uppercase tracking-wider">{MOCK_TAGS[i % MOCK_TAGS.length]}</span>
+                    </div>
+                    
+                    <div 
+                        className="absolute inset-0 bg-black transition-opacity pointer-events-none" 
+                        style={{ 
+                            opacity: Math.min(shadowOpacity * 0.8, 0.8),
+                            transitionDuration: isDragging ? '0ms' : '700ms'
+                        }} 
+                    />
+                </div>
               </div>
              )
           })}
