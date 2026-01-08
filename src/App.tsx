@@ -245,7 +245,7 @@ const EFFECTS: SlideEffect[] = [
   {
     id: 'coverflow',
     title: 'Coverflow',
-    description: 'Refined iTunes Style',
+    description: 'Classic iTunes Style',
     icon: <Layers size={18} />,
     code: getCodeSnippet('coverflow')
   }
@@ -612,21 +612,24 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
               
               if (Math.abs(offset) > 4.5) return null;
   
-              // Refined Rotation: Clamp to 45 deg max to avoid showing backface on sides
-              const rotateY = Math.sign(offset) * -45 * Math.min(Math.abs(offset), 1);
+              // --- KEY FIX: Use classic continuous rotation (no clamping) for that "Old Design" feel ---
+              // Previously: Math.sign(offset) * -45 * Math.min(Math.abs(offset), 1);
+              const rotateY = offset * -45; 
               
-              const translateX = offset * 60; // Spread out a bit more
+              // --- KEY FIX: Widen spacing to reduce overlap clashing ---
+              // Previously: offset * 60
+              const translateX = offset * 85; 
+
+              // --- KEY FIX: Deep Z-Push to prevent "popping/clipping" ---
+              // Push side cards WAY back so the center card has total dominance
+              const translateZ = -Math.abs(offset) * 500;
+
               const zIndex = 20 - Math.round(Math.abs(offset));
               const opacity = 1 - Math.min(Math.abs(offset), 3) * 0.15;
               const scale = 1.2 - Math.min(Math.abs(offset), 2) * 0.2; 
               
-              // Flip Logic: Active card flips on Click/Tap, not Hover
               const isActive = Math.round(offset) === 0;
               const flipped = isActive && isFlipped;
-
-              // Deeper depth for side cards to avoid z-fighting/popping
-              // Main depth step + slight receding for further cards
-              const translateZ = -Math.min(Math.abs(offset), 1) * 300 - Math.max(0, Math.abs(offset)-1) * 50;
 
               return (
                 <div
@@ -634,7 +637,6 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                   className={`absolute w-[35%] ${aspectRatioClass} ease-out shadow-2xl origin-center`}
                   style={{
                     transformStyle: 'preserve-3d', 
-                    // Flip rotation added to the existing Y rotation
                     transform: `translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY + (flipped ? 180 : 0)}deg) scale(${scale})`,
                     zIndex: zIndex,
                     opacity: opacity,
@@ -644,7 +646,6 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                 >
                     {/* --- INNER CARD CONTENT (Front & Back) --- */}
                     
-                    {/* Thickness Layers - Only show when NOT flipped to avoid visual glitches during transition */}
                     {!flipped && Array.from({ length: 8 }, (_, i) => i + 1).map(n => (
                         <div 
                             key={`depth-${n}`}
