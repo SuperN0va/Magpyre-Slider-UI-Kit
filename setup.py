@@ -41,6 +41,45 @@ package_json = r"""{
   }
 }"""
 
+# TypeScript Config (Main) - This was missing!
+tsconfig_json = r"""{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}"""
+
+# TypeScript Config (Node/Vite) - This was missing!
+tsconfig_node_json = r"""{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}"""
+
 devcontainer_json = r"""{
   "name": "React Slider Showcase",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
@@ -65,9 +104,6 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // Base path for deployment. 
-  // If deploying to https://<USERNAME>.github.io/<REPO>/, set this to '/<REPO>/'
-  // For Vercel or root domains, keep it as './' or '/'
   base: './', 
   server: {
     host: true,
@@ -1169,7 +1205,9 @@ files = {
     "src/index.css": src_index_css,
     "src/main.tsx": src_main_tsx,
     ".github/workflows/deploy.yml": github_workflow_yml,
-    "src/App.tsx": src_app_tsx
+    "src/App.tsx": src_app_tsx,
+    "tsconfig.json": tsconfig_json,
+    "tsconfig.node.json": tsconfig_node_json
 }
 
 for filepath, content in files.items():
