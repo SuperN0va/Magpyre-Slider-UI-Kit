@@ -223,7 +223,7 @@ jobs:
         uses: actions/deploy-pages@v4
 """
 
-# The main application code - Implemented Click-to-Flip for Mobile/Desktop
+# The main application code - Implemented Auto-Flip Back Logic
 src_app_tsx = r"""import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid, Info, Heart, Share2 } from 'lucide-react';
 
@@ -503,6 +503,15 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     setDragX(0);
     setIsFlipped(false);
   }, [images]);
+
+  // Auto-flip back timer
+  useEffect(() => {
+    if (!isFlipped) return;
+    const timer = setTimeout(() => {
+      setIsFlipped(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [isFlipped]);
 
   // Updated Autoplay: pauses if dragging, hovering, OR if a card is flipped (user is reading)
   useEffect(() => {

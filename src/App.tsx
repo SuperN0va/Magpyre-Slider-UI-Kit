@@ -278,6 +278,15 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
     setIsFlipped(false);
   }, [images]);
 
+  // Auto-flip back timer
+  useEffect(() => {
+    if (!isFlipped) return;
+    const timer = setTimeout(() => {
+      setIsFlipped(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [isFlipped]);
+
   // Updated Autoplay: pauses if dragging, hovering, OR if a card is flipped (user is reading)
   useEffect(() => {
     if (total === 0 || isDragging || isHovering || isFlipped) return;
