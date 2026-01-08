@@ -612,23 +612,22 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
               
               if (Math.abs(offset) > 4.5) return null;
   
-              // --- RESTORED: Classic iTunes-style rotation and spacing ---
-              // Continuous rotation based on offset
-              const rotateY = offset * -45; 
+              // --- KEY RESTORATION: Classic clamped rotation ---
+              // Limit rotation to max 45 degrees to avoid showing the back
+              const rotateY = Math.max(-45, Math.min(45, offset * -45));
               
-              // Tighter spacing (50 instead of 85) to bring cards closer
-              const translateX = offset * 50; 
+              // --- KEY RESTORATION: Standard Spacing ---
+              const translateX = offset * 60; 
 
-              // Minimal Z-Depth push to maintain stacking order without excessive gap
-              // Using a small negative value to ensure z-indexing works but cards stay close
-              // Removing the large -500px push
-              const translateZ = 0; 
+              // --- KEY: Deep Push on Z-axis ---
+              // Only push back side cards (abs(offset) > 0.5) to separate them from center
+              // Center card stays at 0
+              const translateZ = -Math.abs(offset) * 250;
 
               const zIndex = 20 - Math.round(Math.abs(offset));
               const opacity = 1 - Math.min(Math.abs(offset), 3) * 0.15;
               
-              // Subtle scale drop-off for side cards
-              const scale = 1 - Math.min(Math.abs(offset), 1) * 0.2; // Center 1.0, sides 0.8
+              const scale = 1.0; // Keep scale consistent for classic look
               
               const isActive = Math.round(offset) === 0;
               const flipped = isActive && isFlipped;
