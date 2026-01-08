@@ -224,7 +224,7 @@ const EFFECTS: SlideEffect[] = [
   {
     id: 'zoom-out',
     title: 'Zoom Out',
-    description: 'Focus Zoom Effect',
+    description: 'Focus Zoom Effect + Tap Flip',
     icon: <Maximize size={18} />,
     code: getCodeSnippet('zoom-out')
   },
@@ -414,8 +414,11 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
             if (Math.abs(offset) > 4.5) return null;
 
             const absOffset = Math.abs(offset);
-            const isActive = absOffset < 0.5;
-            
+            // Flip Active Logic for Zoom Out
+            const isActive = Math.round(offset) === 0;
+            const flipped = isActive && isFlipped;
+
+            // Simple scaling logic
             let scale = 1.1 - Math.min(absOffset, 1) * 0.45;
             let opacity = 1 - Math.min(absOffset, 1) * 0.6;
             const zIndex = 20 - Math.round(absOffset);
@@ -426,20 +429,51 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                 key={i}
                 className={`absolute w-[45%] ${aspectRatioClass} transition-all ease-[cubic-bezier(0.25,0.1,0.25,1.0)] group`} 
                 style={{
-                  transform: `translateX(${translateX}%) scale(${scale})`,
+                  transformStyle: 'preserve-3d', // Enable 3D flip
+                  // Add flip rotation
+                  transform: `translateX(${translateX}%) scale(${scale}) rotateY(${flipped ? 180 : 0}deg)`,
                   opacity: Math.max(opacity, 0.4),
                   zIndex: zIndex,
                   transitionDuration: isDragging ? '0ms' : '700ms'
                 }}
               >
-                <div className="relative w-full h-full overflow-hidden rounded-xl shadow-2xl">
+                 {/* --- ZOOM OUT INNER CONTENT --- */}
+                 
+                 {/* FRONT FACE */}
+                <div className="absolute inset-0 w-full h-full overflow-hidden rounded-xl shadow-2xl backface-hidden bg-slate-900">
                     <img src={src} className="w-full h-full object-cover" alt="" />
                     <div className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${isActive ? 'opacity-0' : 'opacity-40'}`} />
                     
-                    {/* Tags Layer */}
                     <div className="absolute top-3 left-3 px-2 py-1 bg-black/40 backdrop-blur-sm border border-white/10 rounded-full flex items-center gap-1.5 transition-opacity duration-300" style={{ opacity: isActive ? 1 : 0.6 }}>
                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
                         <span className="text-[10px] font-medium text-white/90 uppercase tracking-wide">{MOCK_TAGS[i % MOCK_TAGS.length]}</span>
+                    </div>
+                </div>
+
+                {/* BACK FACE (Info) - Reusing the Coverflow back style */}
+                <div className="absolute inset-0 w-full h-full bg-slate-800 rounded-xl overflow-hidden backface-hidden border border-slate-700 flex flex-col p-6 shadow-2xl"
+                        style={{ transform: 'rotateY(180deg)' }}>
+                    
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                            <Info size={16} />
+                        </div>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Details</span>
+                    </div>
+
+                    <h3 className="text-white font-bold text-xl mb-2">{MOCK_TITLES[i % MOCK_TITLES.length]}</h3>
+                    <p className="text-slate-400 text-xs leading-relaxed mb-6">
+                        {MOCK_DESC}
+                    </p>
+
+                    <div className="mt-auto flex items-center justify-between border-t border-slate-700/50 pt-4">
+                        <div className="flex gap-3 text-slate-400">
+                            <button className="hover:text-white transition-colors"><Heart size={18} /></button>
+                            <button className="hover:text-white transition-colors"><Share2 size={18} /></button>
+                        </div>
+                        <button className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-colors">
+                            View More
+                        </button>
                     </div>
                 </div>
               </div>
@@ -594,8 +628,9 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
                   className={`absolute w-[35%] ${aspectRatioClass} ease-out shadow-2xl origin-center`}
                   style={{
                     transformStyle: 'preserve-3d', 
-                    // Flip rotation added to the existing Y rotation
-                    transform: `translateX(${translateX}%) rotateY(${rotateY + (flipped ? 180 : 0)}deg) scale(${scale})`,
+                    // FIX: Added translateZ(-abs(offset)*200) to physically push back neighbor cards, resolving the "sudden pop"
+                    // Also added flip rotation
+                    transform: `translateX(${translateX}%) translateZ(${-Math.abs(offset) * 200}px) rotateY(${rotateY + (flipped ? 180 : 0)}deg) scale(${scale})`,
                     zIndex: zIndex,
                     opacity: opacity,
                     borderRadius: '12px',
