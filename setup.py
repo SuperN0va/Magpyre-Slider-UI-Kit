@@ -41,7 +41,7 @@ package_json = r"""{
   }
 }"""
 
-# TypeScript Config (Main) - This was missing!
+# TypeScript Config (Main)
 tsconfig_json = r"""{
   "compilerOptions": {
     "target": "ES2020",
@@ -68,7 +68,7 @@ tsconfig_json = r"""{
   "references": [{ "path": "./tsconfig.node.json" }]
 }"""
 
-# TypeScript Config (Node/Vite) - This was missing!
+# TypeScript Config (Node/Vite)
 tsconfig_node_json = r"""{
   "compilerOptions": {
     "composite": true,
@@ -223,7 +223,7 @@ jobs:
         uses: actions/deploy-pages@v4
 """
 
-# The main application code - REMOVED UNUSED IMPORTS
+# The main application code - Top Navigation Layout
 src_app_tsx = r"""import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
 
@@ -430,43 +430,43 @@ ${imagesArray}export default function CoverflowSlider() {
 const EFFECTS: SlideEffect[] = [
   {
     id: 'cube',
-    title: 'Cube 全景环绕',
-    description: '无限循环的3D全景圆环展示，支持自定义图片间距。',
+    title: 'Cube 3D',
+    description: '360° Infinite Panoramic Rotation',
     icon: <Cuboid size={18} />,
     code: getCodeSnippet('cube')
   },
   {
     id: 'stack',
-    title: 'Stack 堆叠',
-    description: '网红卡片堆叠效果。顶层卡片滑走，底层卡片自动上浮。',
+    title: 'Stack',
+    description: 'Card Deck Effect',
     icon: <CreditCard size={18} />,
     code: getCodeSnippet('stack')
   },
   {
     id: 'zoom-out',
-    title: 'Zoom Out 聚焦',
-    description: '中间卡片放大，两侧卡片缩小，营造强烈的视觉焦点。',
+    title: 'Zoom Out',
+    description: 'Focus Zoom Effect',
     icon: <Maximize size={18} />,
     code: getCodeSnippet('zoom-out')
   },
   {
     id: 'standard',
-    title: 'Standard 标准',
-    description: '经典的单张轮播效果，简单可靠。',
+    title: 'Standard',
+    description: 'Classic Slider',
     icon: <Box size={18} />,
     code: getCodeSnippet('standard')
   },
   {
     id: 'multiple',
-    title: 'Carousel 多图',
-    description: '同时展示多张卡片，并且允许显示部分下一张。',
+    title: 'Carousel',
+    description: 'Multi-Item View',
     icon: <Layout size={18} />,
     code: getCodeSnippet('multiple')
   },
   {
     id: 'coverflow',
-    title: 'Coverflow 3D',
-    description: '模拟 iTunes 经典的 Coverflow 效果。',
+    title: 'Coverflow',
+    description: 'iTunes Style 3D',
     icon: <Layers size={18} />,
     code: getCodeSnippet('coverflow')
   }
@@ -1022,46 +1022,41 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-3 space-y-8">
-            <div>
-                <h2 className="text-2xl font-bold mb-2">选择滑动效果</h2>
-                <p className="text-slate-400 text-sm">点击下方卡片切换演示，右侧将生成对应代码。</p>
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-bold mb-1">Select Effect</h2>
+                    <p className="text-slate-400 text-sm">Choose a slider animation style.</p>
+                </div>
+                 <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-500 max-w-md">
+                     System automatically adapts container ratio based on uploaded image. You can also force a specific ratio.
+                 </div>
             </div>
-            <div className="grid gap-3">
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {EFFECTS.map((effect) => (
                     <button
                         key={effect.id}
                         onClick={() => setSelectedEffect(effect.id)}
-                        className={`group relative flex items-start p-4 rounded-xl border text-left transition-all duration-300
+                        className={`group relative flex flex-col items-center p-4 rounded-xl border text-center transition-all duration-300
                             ${selectedEffect === effect.id 
                                 ? 'bg-indigo-600/10 border-indigo-500 ring-1 ring-indigo-500/50' 
                                 : 'bg-slate-900 border-slate-800 hover:border-slate-600 hover:bg-slate-800/50'}
                         `}
                     >
-                        <div className={`mt-1 p-2 rounded-lg mr-4 transition-colors ${selectedEffect === effect.id ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 group-hover:bg-slate-700'}`}>
+                        <div className={`p-3 rounded-lg mb-3 transition-colors ${selectedEffect === effect.id ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 group-hover:bg-slate-700'}`}>
                             {effect.icon}
                         </div>
-                        <div>
-                            <h3 className={`font-semibold text-sm ${selectedEffect === effect.id ? 'text-indigo-300' : 'text-slate-200'}`}>
-                                {effect.title}
-                            </h3>
-                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                                {effect.description}
-                            </p>
-                        </div>
+                        <h3 className={`font-semibold text-sm ${selectedEffect === effect.id ? 'text-indigo-300' : 'text-slate-200'}`}>
+                            {effect.title}
+                        </h3>
                     </button>
                 ))}
             </div>
-             <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                 <h4 className="text-sm font-semibold text-slate-300 mb-2">图片适配说明</h4>
-                 <p className="text-xs text-slate-500 leading-relaxed">
-                     容器现支持自定义比例。上传图片后，系统会默认使用 Auto 模式适配图片比例。您也可以手动强制容器比例。
-                 </p>
-             </div>
         </div>
 
-        <div className="lg:col-span-9 space-y-6">
+        <div className="space-y-6">
             <div className="rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur overflow-hidden relative group">
                 <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20 pointer-events-none">
                     <div className="flex items-center gap-2 pointer-events-auto">
@@ -1146,7 +1141,7 @@ export default function App() {
                     </div>
                 </div>
                 
-                <div className="p-8 lg:p-12 min-h-[500px] flex flex-col items-center justify-center bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-opacity-20 transition-all duration-500">
+                <div className="p-8 lg:p-12 min-h-[650px] flex flex-col items-center justify-center bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-opacity-20 transition-all duration-500">
                     <PreviewSimulator 
                         type={selectedEffect} 
                         images={displayImages} 
