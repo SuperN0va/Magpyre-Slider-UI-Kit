@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid, Tag } from 'lucide-react';
+import { Copy, Check, ChevronLeft, ChevronRight, Layout, Maximize, Layers, Box, Smartphone, Upload, Trash2, Gauge, Monitor, CreditCard, Cuboid } from 'lucide-react';
 
 // --- Types ---
 type EffectType = 'zoom-out' | 'standard' | 'multiple' | 'coverflow' | 'stack' | 'cube';
@@ -601,7 +601,7 @@ const PreviewSimulator = ({ type, images, aspectRatioClass, autoPlaySpeed, conta
             })}
           </div>
             
-            <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-4 z-30 p-3 bg-black/40 hover:bg-black/60 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 pointer-events-auto"><ChevronLeft size={24} /></button>
+            <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-4 z-30 p-3 bg-black/30 hover:bg-black/50 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 pointer-events-auto"><ChevronLeft size={24} /></button>
             <button onClick={(e) => { e.stopPropagation(); next(); }} className="absolute right-4 z-30 p-3 bg-black/30 hover:bg-black/50 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 pointer-events-auto"><ChevronRight size={24} /></button>
         </div>
       );
